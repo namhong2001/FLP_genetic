@@ -5,8 +5,6 @@
 
 "use strict";
 
-const Genetic = require('genetic-js');
-
 const USER_DATA = {
     areaSize: 100,
     boxCount: 16,
