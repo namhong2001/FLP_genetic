@@ -3,5 +3,10 @@
 }
 
 #canvas {
-    margin: 100px 0;
+    width: 500px;
+    height: 500px;
+}
+
+#run-button {
+    font-size: 1.5rem;
 }
