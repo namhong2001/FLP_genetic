@@ -9,8 +9,21 @@
 <body>
 <button type="button" id="run-button">run</button>
 <hr>
-<p id="generation"></p>
-<canvas class="box" id="canvas" width="500" height="500"></canvas>
+<form>
+    <label>box count : <input type="number" id="box-count"></label><br>
+    <label>path width (relative to 100) : <input type="number" id="path-width"></label><br>
+</form>
+<p>
+    Generation : <span id="generation"></span>
+</p>
+
+<div id="canvas-container">
+    <div id="start"></div>
+    <canvas class="box" id="canvas" width="500" height="500"></canvas>
+    <div id="end"></div>
+</div>
+
+<p id="log"></p>
 
 <script src="node_modules/genetic-js/js/genetic-0.1.14.js"></script>
 <script src="index.js"></script>

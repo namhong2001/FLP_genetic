@@ -8,32 +8,22 @@
 
 const USER_DATA = {
     areaSize: 100,
-    boxCount: 6,
+    boxCount: 5,
     pathWidth: 1,
     relations: [
-        [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        [0, 1, 0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0]
     ],
-    boxSize: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+    boxSize: [10, 10, 10, 10, 10, 0, 0],
     fitnessMax: 987654321,
     startPos: [50, 0],
     endPos: [50, 100],
-    startRelations: [1, 0, 0, 0, 0, 0],
-    endRelations: [0, 0, 0, 0, 0, 1]
+    startEndWeight: 5
 };
 
 const CONFIG = {
@@ -51,24 +41,12 @@ genetic.select1 = Genetic.Select1.Tournament2;
 genetic.select2 = Genetic.Select2.Tournament2;
 
 genetic.seed = function () {
-    return [
-        0, 0,
-        10, 10,
-        20, 20,
-        30, 30,
-        40, 40,
-        50, 50,
-        // 60, 60,
-        // 70, 70,
-        // 80, 80,
-        // 90, 90,
-        // 90, 0,
-        // 80, 10,
-        // 70, 20,
-        // 60, 30,
-        // 50, 40,
-        // 40, 50
-    ];
+    let ret = [];
+    for (let i=0; i<this.userData.boxCount; ++i) {
+        ret.push(Math.floor(Math.random() * this.userData.areaSize));
+        ret.push(Math.floor(Math.random() * this.userData.areaSize));
+    }
+    return ret;
 };
 
 genetic.mutate = function (entity) {
@@ -113,104 +91,142 @@ genetic.crossover = function (mother, father) {
 
 genetic.fitness = function (entity) {
     let fitness = 0;
-    let _this = this;
-    let startPosX = this.userData.startPos[0];
-    let startPosY = this.userData.startPos[1];
-    let endPosX = this.userData.endPos[0];
-    let endPosY = this.userData.endPos[1];
-    for (let i = 0; i < this.userData.boxCount; ++i) {
-        let x1 = entity[2*i];
-        let y1 = entity[2*i+1];
-        let size1 = this.userData.boxSize[i];
+    let boxCount = this.userData.boxCount;
+    let nodeNum = this.userData.boxCount + 2;
 
-        for (let j = i + 1; j < this.userData.boxCount; ++j) {
-            let x2 = entity[2*j];
-            let y2 = entity[2*j+1];
-            let size2 = this.userData.boxSize[j];
+    entity = entity.slice(0);
+    entity[2*boxCount] = this.userData.startPos[0];
+    entity[2*boxCount + 1] = this.userData.startPos[1];
+    entity[2*(boxCount+1)] = this.userData.endPos[0];
+    entity[2*(boxCount+1) + 1] = this.userData.endPos[1];
 
-
-            if (!isValid(i, j, entity)) return this.userData.fitnessMax;
+    for (let i = 0; i < nodeNum; ++i) {
+        for (let j = i + 1; j < nodeNum; ++j) {
+            if (!isValid.call(this, i, j, entity)) return this.userData.fitnessMax;
 
             if (this.userData.relations[i][j]) {
-                fitness += getDistance(x1, y1, x2, y2, size1, size2);
+                fitness += calDistance.call(this, i, j, entity);
             }
-        }
-
-        if (this.userData.startRelations[i]) {
-            fitness += getDistance(x1, y1, startPosX, startPosY, size1, 0);
-        } else if (this.userData.endRelations[i]) {
-            fitness += getDistance(x1, y1, endPosX, endPosY, size1, 0);
         }
     }
 
     return fitness;
 
-    function getDistance (x1, y1, x2, y2, size1, size2) {
-        let x1_center = x1 + size1 / 2;
-        let y1_center = y1 + size1 / 2;
-        let x2_center = x2 + size2 / 2;
-        let y2_center = y2 + size2 / 2;
+    function calDistance (index1, index2, entity) {
 
-        return Math.abs(x1_center - x2_center) + Math.abs(y1_center - y2_center);
+        let ret;
+        let boxSize = this.userData.boxSize;
+        let boxCount = this.userData.boxCount;
+
+        let x1_center = entity[2*index1] + boxSize[index1] / 2;
+        let y1_center = entity[2*index1 + 1] + boxSize[index1] / 2;
+        let x2_center = entity[2*index2] + boxSize[index2] / 2;
+        let y2_center = entity[2*index2 + 1] + boxSize[index2]  / 2;
+
+
+        ret = Math.abs(x1_center - x2_center) + Math.abs(y1_center - y2_center);
+        if (index1 === boxCount || index2 === boxCount || index1 === boxCount + 1 || index2 === boxCount + 1) {
+            ret *= this.userData.startEndWeight;
+        }
+
+        // cal detour
+        let xMin = Math.min(x1_center, x2_center);
+        let xMax = Math.max(x1_center, x2_center);
+
+        let yMin = Math.min(y1_center, y2_center);
+        let yMax = Math.max(y1_center, y2_center);
+
+        let detourX = 0;
+        let detourY = 0;
+
+        for (let i=0; i < boxCount; ++i) {
+            if (i === index1 || i === index2) continue;
+
+            let targetBoxSize = boxSize[i];
+            let tXMin = entity[2*i];
+            let tYMin = entity[2*i + 1];
+            let tXMax = tXMin + targetBoxSize;
+            let tYMax = tYMin + targetBoxSize;
+
+            if (xMin > tXMin && xMax < tXMax) {
+                let tempXDetour = Math.max(xMin - tXMin, tXMax - xMax) * 2;
+                if (tempXDetour > detourX) detourX = tempXDetour;
+            }
+            if (yMin > tYMin && yMax < tYMax) {
+                let tempYDetour = Math.max(yMin - tYMin, tYMax - yMax) * 2;
+                if (tempYDetour > detourY) detourY = tempYDetour;
+            }
+        }
+
+        ret += detourX + detourY;
+        return ret ;
     }
 
     function isValid ($1_index, $2_index, entity) {
-        let $1_xpos = entity[$1_index * 2] + _this.userData.boxSize[$1_index] / 2;
-        let $1_ypos = entity[$1_index * 2 + 1] + _this.userData.boxSize[$1_index] / 2;
-        let $2_xpos = entity[$2_index * 2] + _this.userData.boxSize[$2_index] / 2;
-        let $2_ypos = entity[$2_index * 2 + 1] + _this.userData.boxSize[$2_index] / 2;
+        let areaSize = this.userData.areaSize;
+        let $1_size = this.userData.boxSize[$1_index];
+        let $2_size = this.userData.boxSize[$2_index];
+        let $1_xpos = entity[$1_index * 2] + $1_size / 2;
+        let $1_ypos = entity[$1_index * 2 + 1] + $1_size / 2;
+        let $2_xpos = entity[$2_index * 2] + $2_size / 2;
+        let $2_ypos = entity[$2_index * 2 + 1] + $2_size / 2;
+        let $1_xpos_max = $1_xpos + $1_size;
+        let $1_ypos_max = $1_ypos + $1_size;
+        let $2_xpos_max = $2_xpos + $2_size;
+        let $2_ypos_max = $2_ypos + $2_size;
+
 
         let x_dist = Math.abs($1_xpos - $2_xpos);
         let y_dist = Math.abs($1_ypos - $2_ypos);
-        let min_dist = _this.userData.boxSize[$1_index] / 2 +
-            _this.userData.boxSize[$2_index] / 2 +
-            _this.userData.pathWidth;
+        let min_dist = $1_size / 2 + $2_size / 2 + this.userData.pathWidth;
 
-        return x_dist > min_dist || y_dist > min_dist;
+        return (x_dist > min_dist || y_dist > min_dist) &&
+            $1_xpos_max <= areaSize && $1_ypos_max <= areaSize &&
+            $2_xpos_max <= areaSize && $2_ypos_max <= areaSize;
     }
+
 };
 
 // genetic.generation = function (pop, generation, stats) {
 //
 // };
 
+
 genetic.notification = function (pop, generation, stats, isFinished) {
-    // console.log(generation);
-    // console.log(pop[0].entity);
-
-
     const generationElem = document.getElementById('generation');
-    const _this = this;
     generationElem.textContent = generation + 1;
-    draw(pop[0].entity);
+    draw.call(this, pop[0].entity);
 
     if (isFinished) {
         console.log(pop[0].entity);
         console.log(stats);
     }
-
-
-
-    function draw (gene) {
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const areaFactor = canvas.width / _this.userData.areaSize;
-
-        // 먼저 캔버스를 지운다.
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        for (let i = 0; i < _this.userData.boxCount; ++i) {
-            let size = _this.userData.boxSize[i] * areaFactor;
-            let x = gene[2*i] * areaFactor;
-            let y = gene[2*i+1] * areaFactor;
-            ctx.strokeRect(x, y, size,  size);
-
-            ctx.font = Math.floor(size * 0.7) + "px serif";
-            ctx.textBaseline = "top";
-            ctx.fillText(i+1, x, y);
-        }
-    }
 };
+
+function draw (gene) {
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const areaFactor = canvas.width / this.userData.areaSize;
+    const startPosX = this.userData.startPos[0]*areaFactor;
+    const startPosY = this.userData.startPos[1]*areaFactor;
+    const endPosX = this.userData.endPos[0]*areaFactor;
+    const endPosY = this.userData.endPos[1]*areaFactor;
+    const startEndSize = 5*areaFactor;
+
+    // 먼저 캔버스를 지운다.
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < this.userData.boxCount; ++i) {
+        let size = this.userData.boxSize[i] * areaFactor;
+        let x = gene[2*i] * areaFactor;
+        let y = gene[2*i+1] * areaFactor;
+        ctx.strokeRect(x, y, size,  size);
+
+        ctx.font = Math.floor(size * 0.7) + "px serif";
+        ctx.textBaseline = "top";
+        ctx.fillText(i + 1, x, y);
+    }
+}
 
 
 document.getElementById('run-button').onclick = function () {
