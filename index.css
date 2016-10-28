@@ -7,6 +7,7 @@
     font-size: 0;
 }
 #canvas {
+    margin: 0 30px;
     width: 40vw;
     height: 40vw;
 }

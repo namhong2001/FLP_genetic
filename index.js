@@ -19,7 +19,7 @@ const USER_DATA = {
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0]
     ],
-    boxSize: [10, 10, 10, 10, 10, 0, 0],
+    boxSize: [6, 20, 14, 8, 10, 0, 0],
     fitnessMax: 987654321,
     startPos: [50, 0],
     endPos: [50, 100],
@@ -125,14 +125,15 @@ genetic.fitness = function (entity) {
         let x_distance = Math.abs(x1_center - x2_center);
         let y_distance = Math.abs(y1_center - y2_center);
 
-
         ret = x_distance + y_distance;
+
+        // eliminate box size
+        ret -= boxSize[index1] / 2 + boxSize[index2] / 2;
+
         if (index1 === boxCount || index2 === boxCount || index1 === boxCount + 1 || index2 === boxCount + 1) {
             ret *= this.userData.startEndWeight;
         }
 
-        // eliminate box size
-        ret -= boxSize[index1] / 2 + boxSize[index2] / 2;
 
         // cal detour
         let xMin = Math.min(x1_center, x2_center);
@@ -175,10 +176,10 @@ genetic.fitness = function (entity) {
         let $1_ypos = entity[$1_index * 2 + 1] + $1_size / 2;
         let $2_xpos = entity[$2_index * 2] + $2_size / 2;
         let $2_ypos = entity[$2_index * 2 + 1] + $2_size / 2;
-        let $1_xpos_max = $1_xpos + $1_size;
-        let $1_ypos_max = $1_ypos + $1_size;
-        let $2_xpos_max = $2_xpos + $2_size;
-        let $2_ypos_max = $2_ypos + $2_size;
+        let $1_xpos_max = $1_xpos + $1_size / 2;
+        let $1_ypos_max = $1_ypos + $1_size / 2;
+        let $2_xpos_max = $2_xpos + $2_size / 2;
+        let $2_ypos_max = $2_ypos + $2_size / 2;
 
 
         let x_dist = Math.abs($1_xpos - $2_xpos);
@@ -210,6 +211,9 @@ genetic.notification = function (pop, generation, stats, isFinished) {
 
     if (isFinished) {
         solutionFitnessElem.textContent = stats.maximum;
+        // let custom_gene = [45, 10, 45, 32, 30, 55, 46, 55, 45, 70];
+        // console.log(this.fitness(custom_gene));
+        // draw(custom_gene);
     }
 };
 
