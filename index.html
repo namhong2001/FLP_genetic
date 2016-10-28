@@ -9,21 +9,60 @@
 <body>
 <button type="button" id="run-button">run</button>
 <hr>
+<div class="flex">
+<div class="half">
 <form>
-    <label>box count : <input type="number" id="box-count"></label><br>
-    <label>path width (relative to 100) : <input type="number" id="path-width"></label><br>
+    <label for="area-size">areaSize </label>
+    <input type="number" id="area-size"><br>
+
+    <label for="path-width">path width </label>
+    <input type="number" id="path-width"><br>
+
+    <label for="box-count">box count </label>
+    <input type="number" id="box-count"><br>
+
+    <label for="relations">relations </label>
+    <input type="number" id="relations"><br>
+
+    <fieldset>
+        <legend>start position</legend>
+        <label for="start-position-x">x</label>
+        <input id="start-position-x"><br>
+
+        <label for="start-position-y">y</label>
+        <input type="number" id="start-position-y">
+    </fieldset>
+    <fieldset>
+        <legend>end position</legend>
+        <label for="end-position-x">x</label>
+        <input type="number" id="end-position-x"><br>
+
+        <label for="end-position-y">y</label>
+        <input type="number" id="end-position-y">
+    </fieldset>
 </form>
+<hr>
 <p>
     Generation : <span id="generation"></span>
 </p>
 
+<p>Initial fitness : <span id="initial-fitness"></span></p>
+<p>Solution fitness : <span id="solution-fitness"></span></p>
+<p id="log"></p>
+<hr>
+
+</div>
+
+<div class="half">
 <div id="canvas-container">
     <div id="start"></div>
     <canvas class="box" id="canvas" width="500" height="500"></canvas>
     <div id="end"></div>
 </div>
+</div>
+</div>
 
-<p id="log"></p>
+
 
 <script src="node_modules/genetic-js/js/genetic-0.1.14.js"></script>
 <script src="index.js"></script>

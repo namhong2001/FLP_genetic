@@ -11,9 +11,9 @@ const USER_DATA = {
     boxCount: 5,
     pathWidth: 1,
     relations: [
-        [0, 1, 0, 0, 0, 1, 0],
-        [0, 0, 1, 0, 0, 0, 0],
-        [0, 0, 0, 1, 0, 0, 0],
+        [0, 1, 1, 0, 1, 1, 0],
+        [0, 0, 1, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 0, 0],
         [0, 0, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 1],
         [0, 0, 0, 0, 0, 0, 0],
@@ -122,12 +122,17 @@ genetic.fitness = function (entity) {
         let y1_center = entity[2*index1 + 1] + boxSize[index1] / 2;
         let x2_center = entity[2*index2] + boxSize[index2] / 2;
         let y2_center = entity[2*index2 + 1] + boxSize[index2]  / 2;
+        let x_distance = Math.abs(x1_center - x2_center);
+        let y_distance = Math.abs(y1_center - y2_center);
 
 
-        ret = Math.abs(x1_center - x2_center) + Math.abs(y1_center - y2_center);
+        ret = x_distance + y_distance;
         if (index1 === boxCount || index2 === boxCount || index1 === boxCount + 1 || index2 === boxCount + 1) {
             ret *= this.userData.startEndWeight;
         }
+
+        // eliminate box size
+        ret -= boxSize[index1] / 2 + boxSize[index2] / 2;
 
         // cal detour
         let xMin = Math.min(x1_center, x2_center);
@@ -159,7 +164,7 @@ genetic.fitness = function (entity) {
         }
 
         ret += detourX + detourY;
-        return ret ;
+        return ret;
     }
 
     function isValid ($1_index, $2_index, entity) {
@@ -194,12 +199,17 @@ genetic.fitness = function (entity) {
 
 genetic.notification = function (pop, generation, stats, isFinished) {
     const generationElem = document.getElementById('generation');
+    const initialFitnessElem = document.getElementById('initial-fitness');
+    const solutionFitnessElem = document.getElementById('solution-fitness');
     generationElem.textContent = generation + 1;
     draw.call(this, pop[0].entity);
 
+    if (generation === 0) {
+        initialFitnessElem.textContent = stats.maximum;
+    }
+
     if (isFinished) {
-        console.log(pop[0].entity);
-        console.log(stats);
+        solutionFitnessElem.textContent = stats.maximum;
     }
 };
 
